@@ -1,0 +1,208 @@
+{% load widget_tweaks %}
+{{ form.media }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WeBlog - Create New Blog</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- AOS CSS -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fffaf6;
+      color: #333;
+    }
+
+    .navbar {
+      background-color: #fcefe3;
+      padding: 1rem;
+      border-bottom: 1px solid #e0d6ce;
+    }
+
+    .navbar-brand {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #2f2f2f;
+    }
+
+    .btn-primary {
+      background-color: #e5beb9;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 24px;
+    }
+
+    .btn-primary:hover {
+      background-color: #d6a9a4;
+    }
+
+    .btn-outline-dark {
+      border-radius: 6px;
+    }
+
+    .blog-form-container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 30px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .blog-form-container h2 {
+      font-weight: 600;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #f3d8ce;
+      padding-bottom: 10px;
+      text-align: center;
+      color: #3b3b3b;
+    }
+
+    .form-label {
+      font-weight: 500;
+    }
+
+    .cke_contents {
+      min-height: 200px !important;
+      max-height: none !important;
+    }
+
+    .cke_wysiwyg_frame, .cke_wysiwyg_div {
+      min-height: 200px !important;
+    }
+
+    .cke_top, .cke_bottom {
+      background-color: #f8f8f8 !important;
+    }
+
+    .cke_inner {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 40px;
+      margin-top: 60px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      width: 100%;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #image-preview {
+      max-height: 250px;
+      display: none;
+      margin-top: 15px;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand">WeBlog</a>
+    <div class="ms-auto">
+      <a href="/home/" class="btn btn-outline-dark me-2">Home</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Blog Form -->
+<div class="container blog-form-container" data-aos="fade-up">
+  <h2>Create New Blog</h2>
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-4">
+      <label class="form-label">Title</label>
+      {{ form.title|add_class:"form-control form-control-lg" }}
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label">Category</label>
+      {{ form.category|add_class:"form-select form-select-lg" }}
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label">Image</label>
+      {{ form.image|add_class:"form-control" }}
+      <img id="image-preview" />
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label">Content</label>
+      <div class="bg-light p-2 rounded">
+        {{ form.content}}
+      </div>
+    </div>
+    <div class="text-end">
+      <button type="submit" class="btn btn-primary btn-lg px-4 shadow-sm">Publish</button>
+    </div>
+   {% if messages %}
+  <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+    {% for message in messages %}
+      <div class="toast show align-items-center text-white bg-success border-0 mb-2" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %} 
+
+  </form>
+</div>
+
+<!-- CKEditor and AOS Scripts -->
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  CKEDITOR.replace('id_content');
+</script>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init();
+</script>
+
+<!-- Image Preview Script -->
+<script>
+  const imageInput = document.getElementById('id_image');
+  const preview = document.getElementById('image-preview');
+
+  imageInput?.addEventListener('change', () => {
+    const file = imageInput.files[0];
+    if (file) {
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = 'block';
+    }
+  });
+</script>
+<script>
+  // Auto-hide toasts after 3 seconds
+  document.addEventListener("DOMContentLoaded", function () {
+    const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    toastElList.forEach(function (toastEl) {
+      const bsToast = new bootstrap.Toast(toastEl, {
+        delay: 3000,  // 3 seconds
+        autohide: true
+      });
+      bsToast.show();
+    });
+  });
+</script>
+
+</body>
+</html>

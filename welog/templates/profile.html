@@ -1,0 +1,193 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Blogs - WeBlog</title>
+
+  <!-- Bootstrap & AOS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+
+  <style>
+    body {
+      background-color: #fffaf6;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .navbar {
+      background-color: #fcefe3;
+      padding: 1rem;
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .blog-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .blog-card-wrapper {
+      width: 23%;
+      box-sizing: border-box;
+    }
+
+    .blog-card {
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+      height: 100%;
+    }
+
+    .blog-image {
+      height: 200px;
+      width: 100%;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    .btn-edit {
+      background-color: #e5beb9;
+      border: none;
+    }
+
+    .btn-edit:hover {
+      background-color: #d6a9a4;
+    }
+
+    .btn-delete {
+      background-color: #ff6b6b;
+      border: none;
+    }
+
+    .btn-delete:hover {
+      background-color: #e65050;
+    }
+  </style>
+</head>
+<body>
+
+{% if messages %}
+<div aria-live="polite" aria-atomic="true" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+  {% for message in messages %}
+    <div class="toast" role="alert" data-bs-delay="2000" data-bs-autohide="true" style="background-color: #DAF0E1; color: #000;">
+      <div class="toast-body">
+        {{ message }}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="#">WeBlog</a>
+    <div class="ms-auto">
+      <a href="/home/" class="btn btn-outline-dark me-2">Home</a>
+      <a href="/logout/" class="btn btn-outline-dark">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <h2 class="mb-4">My Blogs</h2>
+
+  {% if blogs %}
+    <div class="blog-grid d-flex flex-wrap justify-content-start">
+      {% for blog in blogs %}
+        <div class="blog-card-wrapper" data-aos="fade-up">
+          <div class="blog-card">
+            {% if blog.image %}
+              <img src="{{ blog.image.url }}" class="img-fluid blog-image mb-3" alt="Blog image">
+            {% else %}
+              <img src="{% static 'images/default-blog.jpg' %}" class="img-fluid blog-image mb-3" alt="Default blog image">
+            {% endif %}
+    
+            <h4>
+              <a href="{% url 'blog_detail' blog.id %}" class="text-decoration-none text-dark">{{ blog.title }}</a>
+            </h4>
+            <p class="text-muted">{{ blog.category }} | {{ blog.created_at|date:"F j, Y" }}</p>
+            <div class="d-flex justify-content-end gap-2">
+              <a href="{% url 'edit_blog' blog.id %}" class="btn btn-edit btn-sm">Edit</a>
+              <a href="#" class="btn btn-delete btn-sm" onclick="showDeleteBanner({{ blog.id }})">Delete</a>
+
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center my-5 p-4 rounded shadow-sm" style="background-color: #f9f4f0;">
+      <h4 class="text-secondary mb-3">You haven’t posted any blogs yet 😔</h4>
+      <p class="text-muted mb-4">Let’s start a new habit of blogging —  share your thoughts with the world 🌍</p>
+      <a href="/newblog/" class="btn btn-dark rounded-pill px-4 py-2 shadow-sm">
+        Write Your First Blog
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Delete Confirmation Banner -->
+<div id="deleteConfirmBanner" class="position-fixed top-0 start-50 translate-middle-x shadow"
+     style="z-index: 3000; background-color: #fff8e1; border-left: 5px solid #ffb300; width: 90%; max-width: 600px; display: none; border-radius: 16px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+  
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 p-4">
+    <!-- Message -->
+    <div class="flex-grow-1">
+      <h6 class="mb-1 text-dark">Are you sure you want to delete this blog?</h6>
+      <p class="mb-0 text-muted" style="font-size: 0.9rem;">This action cannot be undone.</p>
+    </div>
+
+    <!-- Buttons -->
+    <div class="d-flex align-items-center gap-2">
+      <form id="deleteForm" method="POST" style="margin: 0;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-danger px-3 rounded-pill">Yes, Delete</button>
+      </form>
+      <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="hideDeleteBanner()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- AOS -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init();
+</script>
+
+<script>
+   window.addEventListener('DOMContentLoaded', () => {
+    const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    toastElList.forEach(toastEl => {
+      const toast = new bootstrap.Toast(toastEl);
+      toast.show();
+    });
+  });
+
+  function showDeleteBanner(blogId) {
+    const deleteForm = document.getElementById('deleteForm');
+    deleteForm.action = `/delete/${blogId}/`;
+    const banner = document.getElementById('deleteConfirmBanner');
+    banner.style.display = 'block';
+  }
+
+  function hideDeleteBanner() {
+    const banner = document.getElementById('deleteConfirmBanner');
+    banner.style.display = 'none';
+  }
+</script>
+
+</body>
+</html>
