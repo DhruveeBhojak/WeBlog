@@ -89,49 +89,6 @@ def register_view(request):
     
     return render(request, 'register.html', {'form': form})
 
-# def register_view(request):
-#     if request.method == 'POST':
-#         form = RegisterForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             username = form.cleaned_data['username']
-#             email = form.cleaned_data['email']
-#             user = User.objects.create_user(
-#                 username=username,
-#                 email=email,
-#                 password=form.cleaned_data['password']
-#             )
-
-#             Profile.objects.create(
-#                 user=user,
-#                 fullname=form.cleaned_data['fullname'],
-#                 gender=form.cleaned_data['gender'],
-#                 DateofBirth=form.cleaned_data['DateofBirth'],
-#                 profile_image=form.cleaned_data['profile_image']
-#             )
-
-#             messages.success(request, "Account created successfully.")
-#             return redirect('login')
-#     else:
-#         form = RegisterForm()
-
-#     return render(request, 'register.html', {'form': form})
-
-# @never_cache
-# def login_view(request):
-#     form = LoginForm(request.POST or None)
-#     if request.method == 'POST':
-#         if form.is_valid():
-#             username = form.cleaned_data['username']
-#             password = form.cleaned_data['password']
-#             user = authenticate(request, username=username, password=password)
-#             if user is not None:
-#                 login(request, user)
-#                 messages.success(request, "Logged in successfully!")
-#                 return redirect('/home/')
-#             else:
-#                 form.add_error(None, "Invalid credentials. Please try again.")
-    
-#     return render(request, 'login.html', {'form': form})
 
 @never_cache
 def login_view(request):
